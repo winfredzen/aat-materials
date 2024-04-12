@@ -33,10 +33,15 @@
  */
 package com.raywenderlich.cinematic.details
 
+import android.animation.AnimatorInflater
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -152,14 +157,46 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
   }
 
   private fun animateBackdrop() {
-    //TODO animate backdrop
+    val animation = AnimationUtils.loadAnimation(requireContext(), R.anim.backdrop_animation)
+    binding.backdrop.startAnimation(animation)
   }
 
   private fun animatePoster() {
-    //TODO animate poster
+//    val animation =
+//      AnimatorInflater.loadAnimator(
+//        requireContext(),
+//        R.animator.poster_animation
+//      ) as ValueAnimator
+//    animation.apply {
+//      addUpdateListener { animation ->
+//        val animatedValue = animation.animatedValue as Float
+//        binding.posterContainer.alpha = animatedValue
+//        binding.posterContainer.scaleX = animatedValue
+//        binding.posterContainer.scaleY = animatedValue
+//      }
+//      start()
+//    }
+
+
+    val animation = AnimatorInflater.loadAnimator(
+      requireContext(),
+      R.animator.poster_animator_set
+    ) as AnimatorSet
+
+    animation.apply {
+      setTarget(binding.posterContainer)
+      start()
+    }
+
   }
 
   private fun animateText() {
-    //TODO animate summary text
+    val textAnimation = AnimatorInflater.loadAnimator(
+      requireContext(),
+      R.animator.text_animation
+    ) as ObjectAnimator
+    // 动画的对象
+    textAnimation.target = binding.summary
+    textAnimation.start()
   }
 }

@@ -1,12 +1,17 @@
 package com.raywenderlich.cinematic.details
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.animation.doOnEnd
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.raywenderlich.cinematic.R
 import com.raywenderlich.cinematic.databinding.ViewFavoriteButtonBinding
 import com.raywenderlich.cinematic.util.DisplayMetricsUtil
@@ -18,6 +23,9 @@ class FavoriteButton @JvmOverloads constructor(
 
     private val binding: ViewFavoriteButtonBinding =
         ViewFavoriteButtonBinding.inflate(LayoutInflater.from(context), this)
+
+    //
+    private val animators = mutableListOf<ValueAnimator>()
 
     init {
         layoutParams = LayoutParams(
@@ -66,7 +74,8 @@ class FavoriteButton @JvmOverloads constructor(
 
         }
 
-        //TODO animate button
+        //animate button
+        animateButton()
     }
 
 
@@ -78,7 +87,76 @@ class FavoriteButton @JvmOverloads constructor(
             isFocusable = true
         }
 
-        //TODO reverse the animations
+        //reverse the animations
+        reverseAnimation()
+    }
+
+    // Button动画
+    private fun animateButton() {
+        val initialWidth = binding.favoriteButton.measuredWidth
+        val finalWidth = binding.favoriteButton.measuredHeight
+        val initialTextSize = binding.favoriteButton.textSize
+
+        // progressBar透明度动画
+        val alphaAnimator = ObjectAnimator.ofFloat(
+            binding.progressBar,
+            "alpha",
+            0f,
+            1f
+        )
+        alphaAnimator.duration = 1000
+        // 先设置alpha位0
+        binding.progressBar.apply {
+            alpha = 0f
+            isVisible = true
+        }
+//        alphaAnimator.addUpdateListener {
+//            binding.progressBar.alpha = it.animatedValue as Float
+//        }
+
+
+        // 字体大小动画
+        val textSizeAnimator = ValueAnimator.ofFloat(
+            initialTextSize,
+            0f
+        )
+        textSizeAnimator.apply {
+            interpolator = OvershootInterpolator()
+            duration = 1000
+        }
+        textSizeAnimator.addUpdateListener {
+            // Since the text size needs to be an sp value, you  have to divide the animated value by the screen density.
+            binding.favoriteButton.textSize = (it.animatedValue as Float) / resources.displayMetrics.density
+        }
+
+        // favoriteButton宽度动画
+        val widthAnimator = ValueAnimator.ofInt(initialWidth, finalWidth)
+        widthAnimator.duration = 1000
+        widthAnimator.addUpdateListener {
+            binding.favoriteButton.updateLayoutParams {
+                this.width = it.animatedValue as Int
+            }
+        }
+
+        animators.addAll(listOf(widthAnimator, alphaAnimator, textSizeAnimator))
+
+        widthAnimator.start()
+        alphaAnimator.start()
+        textSizeAnimator.start()
+
+    }
+
+    // 反转动画
+    private fun reverseAnimation() {
+        animators.forEach { animation ->
+            animation.reverse()
+            if (animators.indexOf(animation) == animators.lastIndex) {
+                // 动画完成后，clear
+                animation.doOnEnd {
+                    animators.clear()
+                }
+            }
+        }
     }
 
 }

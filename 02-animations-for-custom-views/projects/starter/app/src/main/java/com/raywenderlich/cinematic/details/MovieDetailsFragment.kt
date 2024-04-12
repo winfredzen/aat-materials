@@ -115,6 +115,7 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
 
     binding.addToFavorites.setFavorite(movie.isFavorite)
 
+    // favorite点击事件
     binding.addToFavorites.setOnFavoriteClickListener {
       if (movie.isFavorite) {
         viewModel.unsetMovieAsFavorite(movie.id)

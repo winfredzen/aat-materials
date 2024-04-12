@@ -33,10 +33,14 @@
  */
 package com.raywenderlich.cinematic.details
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -96,6 +100,9 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
     }
   }
 
+  /**
+   * 刷新UI
+   */
   private fun renderUi(movie: Movie) {
     loadBackdrop(IMAGE_BASE + movie.backdropPath)
     loadPoster(IMAGE_BASE + movie.posterPath)
@@ -107,6 +114,12 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
 
     if (viewModel.shouldAnimate) {
       //TODO animate the summary
+
+      // 动画
+      animateText(binding.title)
+      animateText(binding.summary)
+      animateText(binding.ratingValue)
+      animateText(binding.movieRating)
     }
 
     binding.addToFavorites.apply {
@@ -138,6 +151,8 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
         binding.poster.setImageDrawable(it)
         if (viewModel.shouldAnimate) {
           //TODO animate poster
+          // 动画
+          animatePoster()
         }
       }.build()
     requireContext().imageLoader.enqueue(posterRequest)
@@ -152,8 +167,70 @@ class MovieDetailsFragment : Fragment(R.layout.fragment_details) {
         binding.backdrop.setImageDrawable(it)
         if (viewModel.shouldAnimate) {
           //TODO animate backdrop
+
+          // 动画
+          animateBackdrop()
         }
       }.build()
     requireContext().imageLoader.enqueue(posterRequest)
   }
+
+  // 海报动画
+  private fun animatePoster() {
+    binding.posterContainer.alpha = 0f
+    val animator = ValueAnimator.ofFloat(0f, 1f)
+    animator.duration = 1000
+    // 插值
+    // 输入为均匀变化0~1.0f之间浮点值，输出为先加速超过临界值1.0f 再慢慢又回落到1.0f 连续变化的浮点值
+    animator.interpolator = OvershootInterpolator()
+    animator.addUpdateListener {
+      val animatedValue = it.animatedValue as Float
+      binding.posterContainer.alpha = animatedValue
+      binding.posterContainer.scaleX = animatedValue
+      binding.posterContainer.scaleY = animatedValue
+    }
+    animator.start()
+  }
+
+
+  // 背景动画 从底部弹出
+  private fun animateBackdrop() {
+    val finalYPosition = binding.backdrop.y
+
+    val startYPosition = finalYPosition + 40
+    binding.backdrop.y = startYPosition
+
+    val animator = ValueAnimator.ofFloat(startYPosition, finalYPosition)
+    animator.duration = 1000
+    animator.interpolator = DecelerateInterpolator()
+
+    animator.addUpdateListener { valueAnimator ->
+      val animatedValue = valueAnimator.animatedValue as Float
+      binding.backdrop.translationY = animatedValue
+    }
+    animator.start()
+  }
+
+  private fun animateText(view: View) {
+    val objectAnimator = ObjectAnimator.ofFloat(
+      view,
+      "alpha",
+      0f,
+      1f
+    )
+
+    objectAnimator.duration = 1500
+    objectAnimator.start()
+  }
+
+
+  //
+//  private fun animateText() {
+//    val animator = ObjectAnimator.ofFloat(binding.summary, "alpha", 0f, 1f)
+//    animator.duration = 1000
+//    animator.start()
+//  }
+
+
+
 }

@@ -69,6 +69,7 @@ class PopularMoviesFragment : Fragment(R.layout.fragment_popular) {
     super.onViewCreated(view, savedInstanceState)
     popularAdapter.setListener(object : MovieListClickListener {
       override fun onMovieClicked(movie: Movie) {
+        // 通过nav_graph.xml定义
         findNavController().navigate(
             PopularMoviesFragmentDirections.actionPopularMoviesFragmentToMovieDetailsFragment(movie.id))
       }

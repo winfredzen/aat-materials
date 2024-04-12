@@ -54,7 +54,9 @@ class AuthActivity : AppCompatActivity() {
     }
 
     viewModel.showMain.observe(this) {
+      // 打开MainActivity
       startActivity(Intent(this, MainActivity::class.java))
+      overridePendingTransition(R.anim.auth_main_enter, R.anim.auth_main_exit)
     }
     viewModel.showLogin.observe(this) {
       showLogin()

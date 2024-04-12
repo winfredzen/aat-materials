@@ -62,4 +62,11 @@ class MainActivity : AppCompatActivity() {
       }
     }
   }
+
+
+  override fun finish() {
+    super.finish()
+    // 动画
+    overridePendingTransition(R.anim.auth_main_enter, R.anim.auth_main_exit)
+  }
 }

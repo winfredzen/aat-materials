@@ -82,6 +82,7 @@ class PopularMoviesFragment : Fragment(R.layout.fragment_popular) {
   }
 
   private fun attachObservers() {
+    // LiveData观察者
     viewModel.movies.observe(viewLifecycleOwner, { movies ->
       popularAdapter.submitList(movies)
     })
