@@ -34,11 +34,18 @@
 package com.raywenderlich.cinematic.login
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.transition.Fade
+import androidx.transition.Slide
+import androidx.transition.TransitionSet
+import com.google.android.material.transition.MaterialSharedAxis
+import com.raywenderlich.cinematic.R
 import com.raywenderlich.cinematic.databinding.FragmentSignupBinding
 
 class SignupFragment : Fragment() {
@@ -46,6 +53,23 @@ class SignupFragment : Fragment() {
 
   private var _binding: FragmentSignupBinding? = null
   private val binding get() = _binding!!
+
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    val logoSlide = Slide(Gravity.TOP).addTarget(R.id.signup_logo).setDuration(1000)
+    val logoFade = Fade().addTarget(R.id.signup_logo).setDuration(2000)
+    val enterTransitionSet = TransitionSet().apply {
+      ordering = TransitionSet.ORDERING_TOGETHER
+      addTransition(logoSlide)
+      addTransition(logoFade)
+    }
+    enterTransition = enterTransitionSet
+    returnTransition = MaterialSharedAxis(MaterialSharedAxis.X, false).apply {
+      duration = 1000
+    }
+  }
 
   override fun onCreateView(
       inflater: LayoutInflater, container: ViewGroup?,
@@ -60,6 +84,13 @@ class SignupFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     binding.signUpButton.setOnClickListener {
       viewModel.onSignupPressed()
+    }
+    // 在用户点击back button回调
+    activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner) {
+      // 设置isTransitionGroup为true，解决screen flash
+      binding.root.isTransitionGroup = true
+      // pop，展示AuthFragment
+      parentFragmentManager.popBackStack()
     }
   }
 
